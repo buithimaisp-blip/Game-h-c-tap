@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đấu Trường Toán Học Lớp 6 - Tập Hợp & Cách Viết Tập Hợp</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb, #d4fc79);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2 {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Đám mây bồng bềnh trang trí */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 100px;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 25s linear infinite;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 50%;
+        }
+
+        .cloud-1 {
+            width: 170px; height: 60px;
+            top: 10%; left: -200px;
+            animation-duration: 35s;
+        }
+        .cloud-1::before { width: 80px; height: 80px; top: -40px; left: 30px; }
+        .cloud-1::after { width: 60px; height: 60px; top: -30px; left: 90px; }
+
+        .cloud-2 {
+            width: 250px; height: 80px;
+            top: 45%; left: -300px;
+            animation-duration: 48s;
+            animation-delay: -15s;
+        }
+        .cloud-2::before { width: 120px; height: 120px; top: -60px; left: 40px; }
+        .cloud-2::after { width: 90px; height: 90px; top: -40px; left: 130px; }
+
+        @keyframes float {
+            0% { transform: translateX(-100vw); }
+            100% { transform: translateX(100vw); }
+        }
+
+        #formula-container {
+            padding: 2px 6px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 6px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+
+        .progress-bar-rainbow {
+            background: linear-gradient(90deg, #ff007f, #ff7f00, #ffeb00, #00ff7f, #007fff, #7f00ff);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        #confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .drag-pool {
+            min-height: 70px;
+            border: 2px dashed #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .drag-item {
+            cursor: grab;
+            transition: all 0.2s;
+            touch-action: none; /* Ngăn chặn cuộn màn hình khi đang chạm giữ */
+        }
+
+        .drag-item:active {
+            cursor: grabbing;
+        }
+
+        /* Hiệu ứng viền nổi bật khi học sinh chạm chọn phần tử trên điện thoại */
+        .drag-item.selected-touch {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+            transform: scale(1.05);
+        }
+
+        .drop-zone {
+            min-width: 90px;
+            min-height: 44px;
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 relative min-h-screen">
+
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+
+    <canvas id="confetti"></canvas>
+
+    <audio id="bgm" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+    </audio>
+
+    <div class="w-full max-w-2xl bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-6 relative border-4 border-yellow-300 z-10 overflow-hidden transition-all duration-500">
+        
+        <div class="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-red-400 via-orange-400 via-yellow-400 via-green-400 via-blue-400 to-purple-400"></div>
+
+        <button onclick="toggleMusic()" id="music-btn" class="absolute top-5 right-5 w-11 h-11 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full flex items-center justify-center shadow-md transition-all duration-300 z-20 hover:scale-110 btn-bounce">
+            <i class="fa-solid fa-volume-xmark text-lg" id="music-icon"></i>
+        </button>
+
+        <button onclick="toggleSfx()" id="sfx-btn" class="absolute top-5 right-18 w-11 h-11 bg-cyan-400 hover:bg-cyan-500 text-white rounded-full flex items-center justify-center shadow-md transition-all duration-300 z-20 hover:scale-110 btn-bounce">
+            <i class="fa-solid fa-music text-lg" id="sfx-icon"></i>
+        </button>
+
+        <!-- ================= MÀN HÌNH ĐĂNG NHẬP / CHÀO MỪNG ================= -->
+        <div id="screen-login" class="flex flex-col items-center py-6 text-center space-y-6">
+            <div class="relative">
+                <div class="w-24 h-24 bg-blue-400 rounded-full flex items-center justify-center border-4 border-white shadow-xl relative z-10 overflow-hidden animate-pulse">
+                    <i class="fa-solid fa-book-open text-white text-4xl"></i>
+                </div>
+                <div class="absolute -top-6 -left-6 -right-6 h-28 bg-gradient-to-tr from-pink-300 via-purple-300 to-blue-300 rounded-full blur-xl opacity-40 -z-0"></div>
+            </div>
+
+            <div>
+                <h1 class="text-3xl md:text-4xl text-blue-600 font-bold mb-2">Đấu Trường Toán 6!</h1>
+                <p class="text-sm md:text-base text-gray-500 font-medium px-4">Chuyên đề: Tập hợp & Cách viết tập hợp</p>
+            </div>
+
+            <div class="w-full space-y-4 max-w-sm">
+                <div class="text-left">
+                    <label class="block text-gray-700 text-sm font-bold mb-1 ml-2"><i class="fa-solid fa-user-tag text-blue-400 mr-1"></i> Họ và tên của em:</label>
+                    <input type="text" id="student-name" placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-5 py-3 rounded-full border-2 border-blue-200 focus:border-blue-400 focus:outline-none transition-colors text-center font-bold text-gray-700 shadow-sm bg-white/50">
+                </div>
+                <div class="text-left">
+                    <label class="block text-gray-700 text-sm font-bold mb-1 ml-2"><i class="fa-solid fa-school text-pink-400 mr-1"></i> Lớp:</label>
+                    <input type="text" id="student-class" placeholder="Ví dụ: 6A1" class="w-full px-5 py-3 rounded-full border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-colors text-center font-bold text-gray-700 shadow-sm bg-white/50">
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full max-w-xs bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 btn-bounce">
+                BẮT ĐẦU CHƠI! <i class="fa-solid fa-rocket ml-2"></i>
+            </button>
+
+            <div class="pt-4 text-xs text-gray-400 italic">
+                <p>* Nhập đúng tên để thầy/cô kiểm soát điểm số nhé!</p>
+            </div>
+        </div>
+
+        <!-- ================= MÀN HÌNH CHƠI GAME ================= -->
+        <div id="screen-game" class="hidden flex-col py-2 space-y-6">
+            
+            <div class="flex flex-col space-y-2">
+                <div class="flex justify-between items-center text-sm font-bold text-gray-600">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full" id="hud-name">Nguyễn Văn A</span>
+                        <span class="px-3 py-1 bg-pink-100 text-pink-600 rounded-full" id="hud-class">6A1</span>
+                    </div>
+                    <div class="text-right flex items-center space-x-1">
+                        <i class="fa-solid fa-star text-yellow-400 mr-1"></i>
+                        <span>Điểm: </span>
+                        <span id="hud-score" class="text-blue-500">0</span>
+                        <span id="hud-total-limit">/14</span>
+                    </div>
+                </div>
+
+                <div class="relative w-full h-4 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                    <div id="game-progress" class="progress-bar-rainbow h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
+                <div class="text-xs text-right text-gray-400 font-semibold" id="hud-index">Câu hỏi 1/14</div>
+            </div>
+
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-100 shadow-inner relative">
+                <h3 id="question-text" class="text-lg md:text-xl text-gray-800 font-bold leading-relaxed relative z-10">
+                    <!-- Sẽ được tải động -->
+                </h3>
+            </div>
+
+            <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Sẽ được tạo động -->
+            </div>
+
+            <div id="dragdrop-zone" class="hidden flex-col space-y-4">
+                <div class="text-xs md:text-sm font-bold text-gray-500 bg-yellow-50 border border-yellow-200 p-3 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button text-yellow-600 text-base animate-pulse"></i>
+                    <span><b>Học sinh dùng điện thoại:</b> Chỉ cần <b>chạm nhẹ</b> vào ô chữ bên dưới, sau đó <b>chạm tiếp</b> vào ô trống tương ứng là xong!</span>
+                </div>
+                
+                <div id="drag-items-pool" class="drag-pool flex flex-wrap gap-3 p-4 rounded-2xl border-2 border-dashed border-blue-200 items-center justify-center" ondragover="allowDrop(event)" ondrop="handleDropBack(event)">
+                    <!-- Sẽ được tạo động -->
+                </div>
+
+                <div id="drag-targets-container" class="space-y-3">
+                    <!-- Sẽ được tạo động -->
+                </div>
+
+                <button onclick="submitDragDropAnswer()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-2xl shadow-md transition-colors btn-bounce">
+                    Nộp đáp án kéo thả <i class="fa-solid fa-square-check ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= MODAL: PHẢN HỒI ĐÚNG / SAI ================= -->
+        <div id="feedback-modal" class="hidden absolute inset-0 bg-white/95 backdrop-blur-lg flex flex-col items-center justify-center p-6 z-30 transition-all duration-500 rounded-3xl">
+            <div class="text-center space-y-6 max-w-md w-full">
+                <div class="relative flex justify-center">
+                    <div id="feedback-emoji-container" class="w-28 h-28 rounded-full flex items-center justify-center text-7xl shadow-xl border-4 border-white animate-bounce">
+                        😢
+                    </div>
+                </div>
+
+                <div>
+                    <h2 id="feedback-title" class="text-3xl font-extrabold text-green-500">GOOD JOB!</h2>
+                    <p id="feedback-subtitle" class="text-gray-500 font-medium mt-1">Đáp án hoàn toàn chính xác!</p>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200 text-left space-y-2 max-h-56 overflow-y-auto shadow-inner">
+                    <h4 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Giải thích lý do:</h4>
+                    <p id="feedback-explanation" class="text-gray-700 text-sm md:text-base leading-relaxed">
+                        <!-- Sẽ được tạo động -->
+                    </p>
+                </div>
+
+                <button onclick="nextQuestion()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full text-lg shadow-lg hover:shadow-xl transition-all hover:scale-105 btn-bounce">
+                    Câu Tiếp Theo <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= MÀN HÌNH BÁO CÁO KẾT QUẢ CỦA BẠN ================= -->
+        <div id="screen-report" class="hidden flex-col items-center py-4 space-y-6 text-center">
+            <div class="text-6xl text-yellow-400 animate-pulse">🏆</div>
+
+            <div>
+                <h1 class="text-3xl font-extrabold text-blue-600">HOÀN THÀNH THỬ THÁCH!</h1>
+                <p class="text-gray-500 font-semibold mt-1">Chúc mừng em đã hoàn thành bài thi trắc nghiệm.</p>
+            </div>
+
+            <div class="bg-gradient-to-tr from-yellow-100 to-amber-200 border-4 border-yellow-400 rounded-3xl p-6 shadow-xl w-full max-w-sm relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 text-9xl text-yellow-300/30 opacity-60"><i class="fa-solid fa-star"></i></div>
+                <h3 class="text-xl font-bold text-yellow-800">Kết Quả Điểm Số</h3>
+                <div class="text-6xl font-black text-yellow-900 my-2" id="report-score">0/14</div>
+                <p class="text-sm font-bold text-yellow-700" id="report-percentage">0% chính xác</p>
+                <div class="mt-4 text-xs bg-white/60 px-4 py-2 rounded-full inline-block font-bold text-yellow-900" id="report-name-class">
+                    Học sinh: Nguyễn Văn A - Lớp 6A1
+                </div>
+            </div>
+
+            <div class="w-full max-w-md bg-slate-50 border border-slate-200 rounded-xl p-3 text-left">
+                <div class="text-xs text-slate-400 font-bold uppercase tracking-wider"><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i> Mã Xác Thực Kết Quả:</div>
+                <div id="report-hash" class="font-mono text-xs text-slate-600 break-all select-all mt-1 bg-white p-2 rounded border border-slate-100">
+                    LOADING_HASH
+                </div>
+            </div>
+
+            <div class="w-full max-h-60 overflow-y-auto space-y-3 pr-2 text-left bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-inner">
+                <h4 class="font-bold text-gray-500 text-sm mb-2"><i class="fa-solid fa-list-check text-blue-400 mr-1"></i> Chi tiết từng câu hỏi:</h4>
+                <div id="report-breakdown-list" class="space-y-3">
+                    <!-- Sẽ được điền động -->
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 w-full justify-center">
+                <button onclick="copyToClipboard()" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-full text-base shadow-md hover:shadow-lg transition-all btn-bounce flex items-center justify-center">
+                    <i class="fa-solid fa-copy mr-2"></i> Sao chép kết quả
+                </button>
+                <button onclick="downloadReport()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full text-base shadow-md hover:shadow-lg transition-all btn-bounce flex items-center justify-center">
+                    <i class="fa-solid fa-download mr-2"></i> Tải báo cáo (.TXT)
+                </button>
+            </div>
+
+            <button onclick="restartGame()" class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors py-2 underline">
+                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Chơi lại từ đầu
+            </button>
+        </div>
+
+    </div>
+
+    <div class="text-center text-xs text-white/80 font-bold drop-shadow mt-6 z-10 space-y-1">
+        <p><i class="fa-regular fa-copyright"></i> 2026 Đấu Trường Toán Học Lớp 6 - Tiết Học Sáng Tạo</p>
+        <p>Phiên bản tương tác hỗ trợ giáo viên kiểm soát điểm số tuyệt đối.</p>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        let sfxEnabled = true;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        function playSfx(type) {
+            if (!sfxEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+
+                if (type === 'correct') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'triangle';
+                    
+                    const now = ctx.currentTime;
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'wrong') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sawtooth';
+                    
+                    const now = ctx.currentTime;
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+
+                    osc.frequency.setValueAtTime(220.00, now); // A3
+                    osc.frequency.linearRampToValueAtTime(110.00, now + 0.5);
+
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                }
+            } catch (err) {
+                console.log("Audio context is blocked", err);
+            }
+        }
+
+        function toggleSfx() {
+            sfxEnabled = !sfxEnabled;
+            const sfxIcon = document.getElementById('sfx-icon');
+            const sfxBtn = document.getElementById('sfx-btn');
+            if (sfxEnabled) {
+                sfxIcon.className = "fa-solid fa-music text-lg";
+                sfxBtn.className = "absolute top-5 right-18 w-11 h-11 bg-cyan-400 hover:bg-cyan-500 text-white rounded-full flex items-center justify-center shadow-md transition-all duration-300 z-20 hover:scale-110 btn-bounce";
+            } else {
+                sfxIcon.className = "fa-solid fa-volume-xmark text-lg";
+                sfxBtn.className = "absolute top-5 right-18 w-11 h-11 bg-gray-400 hover:bg-gray-500 text-white rounded-full flex items-center justify-center shadow-md transition-all duration-300 z-20 hover:scale-110 btn-bounce";
+            }
+        }
+    </script>
+
+    <script>
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationFrameId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class ConfettiParticle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = -20;
+                this.size = Math.random() * 8 + 6;
+                this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                this.speedY = Math.random() * 5 + 3;
+                this.speedX = Math.random() * 4 - 2;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 4 - 2;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotationSpeed;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (particles.length < 150 && Math.random() < 0.4) {
+                particles.push(new ConfettiParticle());
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+
+                if (p.y > canvas.height) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(animateConfetti);
+        }
+
+        function startConfetti() {
+            particles = [];
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animateConfetti();
+            setTimeout(() => {
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles = [];
+            }, 4000);
+        }
+    </script>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                type: 'mcq',
+                question: 'Cho tập hợp A = {3; 5; 7}. Khẳng định nào sau đây là ĐÚNG?',
+                options: [
+                    { key: 'A', text: '5 ∉ A' },
+                    { key: 'B', text: '7 ∈ A' },
+                    { key: 'C', text: '4 ∈ A' },
+                    { key: 'D', text: '3 ∉ A' }
+                ],
+                correct: 'B',
+                explanation: 'Phần tử số 7 có nằm trong dấu ngoặc nhọn khai báo của tập hợp A nên ta có khẳng định đúng là <div id="formula-container" class="inline-block"><math><mn>7</mn><mo>∊</mo><mi>A</mi></math></div>.'
+            },
+            {
+                id: 2,
+                type: 'mcq',
+                question: 'Cách viết tập hợp nào sau đây là đúng quy cách trong toán học?',
+                options: [
+                    { key: 'A', text: 'M = (1, 2, 3)' },
+                    { key: 'B', text: 'M = {1; 2; 3}' },
+                    { key: 'C', text: 'M = [1; 2; 3]' },
+                    { key: 'D', text: 'M = {1, 2, 3}' }
+                ],
+                correct: 'B',
+                explanation: 'Các phần tử của tập hợp phải được bọc trong dấu ngoặc nhọn {} và được ngăn cách nhau bằng dấu chấm phẩy (;) khi các phần tử là các số để tránh nhầm lẫn với số thập phân.'
+            },
+            {
+                id: 3,
+                type: 'mcq',
+                question: 'Cho tập hợp B là các chữ cái trong từ "HẢI PHÒNG". Tập hợp B được viết là:',
+                options: [
+                    { key: 'A', text: 'B = {H; Ả; I; P; H; Ò; N; G}' },
+                    { key: 'B', text: 'B = {H; Ả; I; P; Ò; N; G}' },
+                    { key: 'C', text: 'B = {H; A; I; P; O; N; G}' },
+                    { key: 'D', text: 'B = {HAIPHONG}' }
+                ],
+                correct: 'C',
+                explanation: 'Khi viết tập hợp các chữ cái từ một từ tiếng Việt, chúng ta quy ước sử dụng chữ in hoa gốc không dấu và mỗi chữ cái chỉ liệt kê 1 lần (chữ H trùng lặp được lược bỏ bớt).'
+            },
+            {
+                id: 4,
+                type: 'mcq',
+                question: 'Viết tập hợp C các số tự nhiên lớn hơn 5 và nhỏ hơn hoặc bằng 9 bằng cách liệt kê phần tử:',
+                options: [
+                    { key: 'A', text: 'C = {5; 6; 7; 8; 9}' },
+                    { key: 'B', text: 'C = {6; 7; 8}' },
+                    { key: 'C', text: 'C = {6; 7; 8; 9}' },
+                    { key: 'D', text: 'C = {5; 6; 7; 8}' }
+                ],
+                correct: 'C',
+                explanation: '"Lớn hơn 5" có nghĩa là không bao gồm số 5. "Nhỏ hơn hoặc bằng 9" có nghĩa là có bao gồm số 9. Các số thỏa mãn là: 6; 7; 8; 9.'
+            },
+            {
+                id: 5,
+                type: 'mcq',
+                question: 'Viết tập hợp X = {x ∈ ℕ | x < 4} bằng cách liệt kê phần tử:',
+                options: [
+                    { key: 'A', text: 'X = {1; 2; 3; 4}' },
+                    { key: 'B', text: 'X = {0; 1; 2; 3; 4}' },
+                    { key: 'C', text: 'X = {1; 2; 3}' },
+                    { key: 'D', text: 'X = {0; 1; 2; 3}' }
+                ],
+                correct: 'D',
+                explanation: 'Vì <div id="formula-container" class="inline-block"><math><mi>x</mi><mo>∊</mo><mo>ℕ</mo></math></div> (tập hợp số tự nhiên) nên số 0 cũng được tính. Các số lẻ và chẵn tự nhiên bé hơn 4 gồm: 0, 1, 2, 3.'
+            },
+            {
+                id: 6,
+                type: 'mcq',
+                question: 'Kí hiệu ℕ* dùng để chỉ tập hợp các số tự nhiên nào dưới đây?',
+                options: [
+                    { key: 'A', text: 'Tập hợp các số tự nhiên.' },
+                    { key: 'B', text: 'Tập hợp các số tự nhiên khác 0.' },
+                    { key: 'C', text: 'Tập hợp các số lẻ.' },
+                    { key: 'D', text: 'Tập hợp các số tự nhiên lớn hơn 10.' }
+                ],
+                correct: 'B',
+                explanation: 'Theo quy ước toán học chung, kí hiệu có thêm dấu sao (*) ở trên đầu đại diện cho tập hợp đã được loại trừ đi phần tử số 0.'
+            },
+            {
+                id: 7,
+                type: 'mcq',
+                question: 'Cho tập hợp P = {x ∈ ℕ* | x ≤ 5}. Số phần tử của tập hợp P là:',
+                options: [
+                    { key: 'A', text: '5 phần tử' },
+                    { key: 'B', text: '6 phần tử' },
+                    { key: 'C', text: '4 phần tử' },
+                    { key: 'D', text: 'Vô số phần tử' }
+                ],
+                correct: 'A',
+                explanation: 'Vì <div id="formula-container" class="inline-block"><math><mi>x</mi><mo>∊</mo><msup><mo>ℕ</mo><mo>*</mo></msup></math></div> nên x không lấy giá trị 0. Tập P gồm các phần tử {1; 2; 3; 4; 5}. Đếm thấy có đúng 5 phần tử.'
+            },
+            {
+                id: 8,
+                type: 'mcq',
+                question: 'Cho tập hợp E = {x ∈ ℕ | 10 < x < 11}. Khẳng định nào dưới đây là ĐÚNG?',
+                options: [
+                    { key: 'A', text: 'Tập hợp E có 1 phần tử là 10.5.' },
+                    { key: 'B', text: 'Tập hợp E là tập hợp rỗng.' },
+                    { key: 'C', text: 'E = {10; 11}' },
+                    { key: 'D', text: 'Tập hợp E có vô số phần tử.' }
+                ],
+                correct: 'B',
+                explanation: 'Giữa hai số tự nhiên liên tiếp là 10 và 11 không tồn tại thêm một số tự nhiên nào khác, nên tập hợp E không chứa bất kỳ phần tử nào (gọi là tập hợp rỗng, kí hiệu ∅).'
+            },
+            {
+                id: 9,
+                type: 'mcq',
+                question: 'Cho hai tập hợp A = {1; 2; 3} và B = {2; 3; 4; 5}. Các phần tử chung của cả hai tập hợp này là:',
+                options: [
+                    { key: 'A', text: 'Không có phần tử chung.' },
+                    { key: 'B', text: 'Các phần tử chung là 1; 2; 3.' },
+                    { key: 'C', text: 'Các phần tử chung là 2; 3.' },
+                    { key: 'D', text: 'Các phần tử chung là 4; 5.' }
+                ],
+                correct: 'C',
+                explanation: 'Các phần tử chung là phần tử cùng xuất hiện ở cả hai tập hợp. Ta quan sát thấy số 2 và 3 vừa thuộc A, vừa thuộc B.'
+            },
+            {
+                id: 10,
+                type: 'mcq',
+                question: 'Số tự nhiên x thỏa mãn x ∈ ℕ và 0 . x = 0. Tập hợp các giá trị x thỏa mãn là:',
+                options: [
+                    { key: 'A', text: '{0}' },
+                    { key: 'B', text: 'Không có số nào thỏa mãn.' },
+                    { key: 'C', text: '{1}' },
+                    { key: 'D', text: 'Tập hợp ℕ.' }
+                ],
+                correct: 'D',
+                explanation: 'Bất kỳ số tự nhiên nào khi nhân với 0 cũng đều có kết quả bằng 0. Do đó, tất cả các số tự nhiên đều thỏa mãn biểu thức này.'
+            },
+            {
+                id: 11,
+                type: 'tf',
+                question: 'Phát biểu sau đây là ĐÚNG hay SAI: "Mọi phần tử thuộc tập hợp ℕ* thì đều thuộc tập hợp ℕ."',
+                options: [
+                    { key: 'T', text: 'ĐÚNG' },
+                    { key: 'F', text: 'SAI' }
+                ],
+                correct: 'T',
+                explanation: '<b>ĐÚNG!</b> Tập ℕ* chỉ khác tập ℕ ở chỗ không chứa số 0. Do đó, bất kỳ phần tử nào nằm trong ℕ* chắc chắn cũng đều thuộc tập ℕ.'
+            },
+            {
+                id: 12,
+                type: 'tf',
+                question: 'Phát biểu sau đây là ĐÚNG hay SAI: "Cách viết A = {0} nghĩa là tập hợp A không có phần tử nào."',
+                options: [
+                    { key: 'T', text: 'ĐÚNG' },
+                    { key: 'F', text: 'SAI' }
+                ],
+                correct: 'F',
+                explanation: '<b>SAI!</b> Tập hợp A = {0} vẫn có chứa 1 phần tử là số 0. Tập rỗng (không có phần tử nào) phải được kí hiệu là ∅.'
+            },
+            
+            // CÂU HỎI KÉO THẢ (DRAG & DROP)
+            {
+                id: 13,
+                type: 'dragdrop',
+                question: 'Cho tập hợp M = {2; 4; 6; 8}. Kéo các kí hiệu thích hợp vào chỗ trống:',
+                pool: ['∈', '∉'],
+                rows: [
+                    { text: 'Số 4 [___] M', correct: '∈' },
+                    { text: 'Số 5 [___] M', correct: '∉' }
+                ],
+                explanation: 'Số 4 là phần tử nằm trong tập M nên ta dùng kí hiệu thuộc (∈). Số 5 không có trong tập M nên ta dùng kí hiệu không thuộc (∉).'
+            },
+            {
+                id: 14,
+                type: 'dragdrop',
+                question: 'Ghép các ô định nghĩa thích hợp với phương pháp mô tả tập hợp tương ứng:',
+                pool: ['Liệt kê phần tử', 'Chỉ ra tính chất đặc trưng'],
+                rows: [
+                    { text: '[___] : Phương pháp viết tất cả các phần tử của tập hợp cách nhau bởi dấu chấm phẩy (;).', correct: 'Liệt kê phần tử' },
+                    { text: '[___] : Phương pháp viết các thuộc tính, điều kiện định nghĩa đại diện cho các phần tử.', correct: 'Chỉ ra tính chất đặc trưng' }
+                ],
+                explanation: 'Phương pháp liệt kê là viết tường minh tất cả phần tử ra. Phương pháp chỉ ra tính chất đặc trưng là dùng công thức toán học khái quát điều kiện.'
+            }
+        ];
+
+        let currentIdx = 0;
+        let score = 0;
+        let studentName = "";
+        let studentClass = "";
+        let answersLog = [];
+        let startTime = null;
+        let musicPlaying = false;
+        let selectedItemForTouch = null; // Quản lý phần tử được chạm chọn trên điện thoại
+
+        const bgm = document.getElementById('bgm');
+        const musicIcon = document.getElementById('music-icon');
+        const musicBtn = document.getElementById('music-btn');
+
+        function toggleMusic() {
+            if (musicPlaying) {
+                bgm.pause();
+                musicIcon.className = "fa-solid fa-volume-xmark text-lg";
+                musicBtn.className = "absolute top-5 right-5 w-11 h-11 bg-gray-400 hover:bg-gray-500 text-white rounded-full flex items-center justify-center shadow-md transition-all duration-300 z-20 hover:scale-110 btn-bounce";
+            } else {
+                bgm.play().then(() => {
+                    musicIcon.className = "fa-solid fa-volume-high text-lg";
+                    musicBtn.className = "absolute top-5 right-5 w-11 h-11 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full flex items-center justify-center shadow-md transition-all duration-300 z-20 hover:scale-110 btn-bounce";
+                }).catch(err => console.log(err));
+            }
+            musicPlaying = !musicPlaying;
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const classInput = document.getElementById('student-class').value.trim();
+
+            if (!nameInput || !classInput) {
+                alert("Em hãy nhập đầy đủ Họ tên và Lớp để bắt đầu nhé!");
+                return;
+            }
+
+            studentName = nameInput;
+            studentClass = classInput;
+            startTime = new Date();
+
+            document.getElementById('hud-name').innerText = studentName;
+            document.getElementById('hud-class').innerText = "Lớp: " + studentClass;
+            document.getElementById('hud-score').innerText = score;
+            
+            document.getElementById('hud-total-limit').innerText = "/" + questions.length;
+
+            bgm.play().then(() => {
+                musicPlaying = true;
+                musicIcon.className = "fa-solid fa-volume-high text-lg";
+                musicBtn.className = "absolute top-5 right-5 w-11 h-11 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full flex items-center justify-center shadow-md transition-all duration-300 z-20 hover:scale-110 btn-bounce";
+            }).catch(() => {});
+
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('screen-game').classList.add('flex');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('hud-index').innerText = `Câu hỏi ${currentIdx + 1}/${questions.length}`;
+            
+            const percent = (currentIdx / questions.length) * 100;
+            document.getElementById('game-progress').style.width = `${percent}%`;
+            document.getElementById('question-text').innerHTML = q.question;
+
+            const mGrid = document.getElementById('options-grid');
+            const dragdropZone = document.getElementById('dragdrop-zone');
+            
+            mGrid.innerHTML = '';
+            mGrid.classList.add('hidden');
+            dragdropZone.classList.add('hidden');
+            selectedItemForTouch = null; // Khởi tạo lại trạng thái chạm chọn câu mới
+
+            if (q.type === 'mcq' || q.type === 'tf') {
+                mGrid.classList.remove('hidden');
+                mGrid.classList.add('grid');
+                
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.onclick = () => selectChoice(opt.key);
+                    
+                    if (q.type === 'tf') {
+                        const styling = opt.key === 'T' 
+                            ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-700' 
+                            : 'bg-rose-50 hover:bg-rose-100 border-rose-300 text-rose-700';
+                        const icon = opt.key === 'T' 
+                            ? '<i class="fa-solid fa-circle-check text-2xl mr-2"></i>' 
+                            : '<i class="fa-solid fa-circle-xmark text-2xl mr-2"></i>';
+                        btn.className = `w-full font-bold py-5 px-6 rounded-2xl border-4 ${styling} shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 text-xl flex items-center justify-center btn-bounce`;
+                        btn.innerHTML = `${icon} ${opt.text}`;
+                    } else {
+                        const optionCircleColor = opt.key === 'A' ? 'bg-pink-100 text-pink-600 border-pink-300' :
+                                                  opt.key === 'B' ? 'bg-blue-100 text-blue-600 border-blue-300' :
+                                                  opt.key === 'C' ? 'bg-yellow-100 text-yellow-600 border-yellow-300' :
+                                                  'bg-purple-100 text-purple-600 border-purple-300';
+                        btn.className = "w-full text-left bg-white hover:bg-sky-50 text-gray-700 font-semibold py-4 px-6 rounded-2xl border-2 border-gray-200 hover:border-blue-400 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 text-base md:text-lg flex items-center space-x-3 btn-bounce";
+                        btn.innerHTML = `
+                            <span class="w-10 h-10 shrink-0 border-2 ${optionCircleColor} rounded-full flex items-center justify-center font-bold text-base md:text-lg">${opt.key}</span>
+                            <span class="leading-snug">${opt.text}</span>
+                        `;
+                    }
+                    mGrid.appendChild(btn);
+                });
+            } else if (q.type === 'dragdrop') {
+                dragdropZone.classList.remove('hidden');
+                dragdropZone.classList.add('flex');
+                
+                const pool = document.getElementById('drag-items-pool');
+                const targetsContainer = document.getElementById('drag-targets-container');
+                pool.innerHTML = '';
+                targetsContainer.innerHTML = '';
+
+                // Tạo các vật kéo
+                q.pool.forEach((itemText, i) => {
+                    const itemEl = document.createElement('div');
+                    itemEl.id = `drag-item-${i}`;
+                    itemEl.innerText = itemText;
+                    itemEl.className = "bg-white border-2 border-indigo-300 text-indigo-700 font-bold px-4 py-2 rounded-xl shadow-sm hover:shadow drag-item select-none";
+                    itemEl.draggable = true;
+                    
+                    // Sự kiện kéo thả của máy tính
+                    itemEl.ondragstart = (e) => e.dataTransfer.setData('text/plain', e.target.id);
+                    
+                    // Sự kiện Click/Chạm cảm ứng của Điện thoại (Bổ sung sửa lỗi quan trọng)
+                    itemEl.onclick = (e) => handleTouchSelect(e, itemEl);
+
+                    pool.appendChild(itemEl);
+                });
+
+                // Tạo các ô trống chờ thả
+                q.rows.forEach((row, rowIndex) => {
+                    const rowEl = document.createElement('div');
+                    rowEl.className = "flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-gray-700 font-bold text-sm md:text-base";
+                    
+                    const labelSpan = document.createElement('span');
+                    const labelParts = row.text.split('[___]');
+                    labelSpan.appendChild(document.createTextNode(labelParts[0]));
+
+                    const dropZoneEl = document.createElement('div');
+                    dropZoneEl.className = "drop-zone inline-flex w-32 h-11 border-2 border-dashed border-indigo-300 bg-white rounded-xl items-center justify-center text-indigo-600 font-black p-1 cursor-pointer";
+                    dropZoneEl.dataset.correct = row.correct;
+                    dropZoneEl.dataset.index = rowIndex;
+                    
+                    // Sự kiện kéo thả của máy tính
+                    dropZoneEl.ondragover = allowDrop;
+                    dropZoneEl.ondrop = handleDropOnZone;
+                    
+                    // Sự kiện Click/Chạm của Điện thoại
+                    dropZoneEl.onclick = () => handleTouchDrop(dropZoneEl);
+
+                    labelSpan.appendChild(dropZoneEl);
+                    if (labelParts[1]) {
+                        labelSpan.appendChild(document.createTextNode(labelParts[1]));
+                    }
+                    
+                    rowEl.appendChild(labelSpan);
+                    targetsContainer.appendChild(rowEl);
+                });
+            }
+        }
+
+        function handleTouchSelect(e, itemEl) {
+            e.stopPropagation(); // Ngăn chặn sự kiện lan truyền lên thẻ cha
+            
+            // Nếu click vào một ô đã nằm trong ô trống, thì cho nó bay ngược lại hộp chứa
+            if (itemEl.parentElement.classList.contains('drop-zone')) {
+                const pool = document.getElementById('drag-items-pool');
+                pool.appendChild(itemEl);
+                return;
+            }
+
+            // Đổi trạng thái chọn
+            if (selectedItemForTouch === itemEl) {
+                itemEl.classList.remove('selected-touch');
+                selectedItemForTouch = null;
+            } else {
+                if (selectedItemForTouch) {
+                    selectedItemForTouch.classList.remove('selected-touch');
+                }
+                selectedItemForTouch = itemEl;
+                itemEl.classList.add('selected-touch');
+            }
+        }
+
+        function handleTouchDrop(dropZoneEl) {
+            // Nếu có một từ đang được chạm chọn ở dưới
+            if (selectedItemForTouch) {
+                // Kiểm tra xem ô trống này đã có chữ chưa
+                if (dropZoneEl.children.length === 0) {
+                    selectedItemForTouch.classList.remove('selected-touch');
+                    dropZoneEl.appendChild(selectedItemForTouch);
+                    selectedItemForTouch = null;
+                }
+            } else {
+                // Nếu không chọn gì mà click vào một ô đã có chữ, ta cho chữ đó bay ngược về hộp chứa
+                if (dropZoneEl.children.length > 0) {
+                    const pool = document.getElementById('drag-items-pool');
+                    pool.appendChild(dropZoneEl.children[0]);
+                }
+            }
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function handleDropOnZone(e) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const item = document.getElementById(id);
+            let target = e.target;
+            
+            while (target && !target.classList.contains('drop-zone')) {
+                target = target.parentElement;
+            }
+
+            if (target && target.children.length === 0) {
+                target.appendChild(item);
+            }
+        }
+
+        function handleDropBack(e) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const item = document.getElementById(id);
+            const pool = document.getElementById('drag-items-pool');
+            pool.appendChild(item);
+        }
+
+        function selectChoice(key) {
+            const q = questions[currentIdx];
+            const isCorrect = (key === q.correct);
+
+            if (isCorrect) {
+                score++;
+                playSfx('correct');
+                document.getElementById('hud-score').innerText = score;
+                triggerFeedbackModal(true, q.explanation);
+            } else {
+                playSfx('wrong');
+                triggerFeedbackModal(false, q.explanation);
+            }
+
+            answersLog.push({
+                num: currentIdx + 1,
+                title: q.question,
+                selected: key,
+                correct: q.correct,
+                status: isCorrect ? 'correct' : 'wrong'
+            });
+        }
+
+        function submitDragDropAnswer() {
+            const q = questions[currentIdx];
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            let anyEmpty = false;
+            let allCorrect = true;
+            let answersGiven = [];
+
+            dropZones.forEach(zone => {
+                if (zone.children.length === 0) {
+                    anyEmpty = true;
+                } else {
+                    const text = zone.children[0].innerText;
+                    answersGiven.push(text);
+                    if (text !== zone.dataset.correct) {
+                        allCorrect = false;
+                    }
+                }
+            });
+
+            if (anyEmpty) {
+                alert("Em hãy kéo hoặc chạm xếp tất cả các từ vào đúng chỗ trống trước khi nộp đáp án nhé!");
+                return;
+            }
+
+            if (allCorrect) {
+                score++;
+                playSfx('correct');
+                document.getElementById('hud-score').innerText = score;
+                triggerFeedbackModal(true, q.explanation);
+            } else {
+                playSfx('wrong');
+                triggerFeedbackModal(false, q.explanation);
+            }
+
+            answersLog.push({
+                num: currentIdx + 1,
+                title: q.question,
+                selected: answersGiven.join(', '),
+                correct: q.rows.map(r => r.correct).join(', '),
+                status: allCorrect ? 'correct' : 'wrong'
+            });
+        }
+
+        function triggerFeedbackModal(isSuccess, explanation) {
+            const modal = document.getElementById('feedback-modal');
+            const emojiBox = document.getElementById('feedback-emoji-container');
+            const title = document.getElementById('feedback-title');
+            const sub = document.getElementById('feedback-subtitle');
+            const expl = document.getElementById('feedback-explanation');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if (isSuccess) {
+                emojiBox.innerText = "🎆";
+                emojiBox.className = "w-28 h-28 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-7xl shadow-xl border-4 border-emerald-300 animate-bounce";
+                title.innerText = "GOOD JOB!";
+                title.className = "text-3xl font-extrabold text-emerald-500 tracking-wide";
+                sub.innerText = "Đáp án của em chính xác tuyệt đối! Xuất sắc!";
+                startConfetti();
+            } else {
+                emojiBox.innerText = "😢";
+                emojiBox.className = "w-28 h-28 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-7xl shadow-xl border-4 border-rose-300 animate-pulse";
+                title.innerText = "TIẾC QUÁ!";
+                title.className = "text-3xl font-extrabold text-rose-500 tracking-wide";
+                sub.innerText = "Chưa đúng rồi. Hãy quan sát lời giải phía dưới nhé!";
+            }
+
+            expl.innerHTML = explanation;
+        }
+
+        function nextQuestion() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+            document.getElementById('feedback-modal').classList.remove('flex');
+
+            currentIdx++;
+            if (currentIdx < questions.length) {
+                loadQuestion();
+            } else {
+                finishGame();
+            }
+        }
+
+        function generateHash(name, score, classStr) {
+            const secret = `${name}_${score}_${classStr}_Quiz6SecuredStringKey`;
+            let hash = 0;
+            for (let i = 0; i < secret.length; i++) {
+                const char = secret.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return "DH-6-" + Math.abs(hash).toString(16).toUpperCase();
+        }
+
+        function finishGame() {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('flex');
+            
+            const screenReport = document.getElementById('screen-report');
+            screenReport.classList.remove('hidden');
+            screenReport.classList.add('flex');
+
+            const total = questions.length;
+            document.getElementById('report-score').innerText = `${score}/${total}`;
+            
+            const accuracy = Math.round((score / total) * 100);
+            document.getElementById('report-percentage').innerText = `${accuracy}% chính xác`;
+            document.getElementById('report-name-class').innerText = `Học sinh: ${studentName} - Lớp: ${studentClass}`;
+
+            const securityHash = generateHash(studentName, score, studentClass);
+            document.getElementById('report-hash').innerText = securityHash;
+
+            const breakdownContainer = document.getElementById('report-breakdown-list');
+            breakdownContainer.innerHTML = '';
+
+            answersLog.forEach(log => {
+                const card = document.createElement('div');
+                const isCorrect = log.status === 'correct';
+                const cardClass = isCorrect ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50';
+                const icon = isCorrect 
+                    ? '<i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>' 
+                    : '<i class="fa-solid fa-circle-xmark text-rose-500 mr-2"></i>';
+
+                card.className = `p-3 rounded-xl border ${cardClass} flex flex-col space-y-1 text-sm`;
+                card.innerHTML = `
+                    <div class="font-bold text-gray-700 flex items-center">
+                        ${icon} Câu ${log.num}: ${log.title.replace(/<\/?[^>]+(>|$)/g, "")}
+                    </div>
+                    <div class="text-xs text-gray-500 pl-6">
+                        Đáp án đã chọn: <span class="font-bold text-gray-700">${log.selected}</span> | Đáp án đúng: <span class="font-bold text-emerald-600">${log.correct}</span>
+                    </div>
+                `;
+                breakdownContainer.appendChild(card);
+            });
+
+            if (score >= Math.round(questions.length * 0.8)) {
+                startConfetti();
+            }
+        }
+
+        function copyToClipboard() {
+            const reportText = generatePlainReport();
+            const tempTextarea = document.createElement("textarea");
+            tempTextarea.value = reportText;
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            try {
+                document.execCommand('copy');
+                alert("Đã sao chép kết quả thi thành công! Em hãy dán và gửi ngay cho Thầy/Cô nhé.");
+            } catch (err) {
+                alert("Sao chép thất bại. Vui lòng chụp ảnh lại màn hình điểm số.");
+            }
+            document.body.removeChild(tempTextarea);
+        }
+
+        function downloadReport() {
+            const reportText = generatePlainReport();
+            const blob = new Blob([reportText], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `KetQua_Toan6_Taphop_${studentName.replace(/\s+/g, '_')}.txt`;
+            link.click();
+        }
+
+        function generatePlainReport() {
+            const total = questions.length;
+            const accuracy = Math.round((score / total) * 100);
+            const endTime = new Date();
+            const timeDiffSec = Math.round((endTime - startTime) / 1000);
+            const min = Math.floor(timeDiffSec / 60);
+            const sec = timeDiffSec % 60;
+            const formattedTime = `${min} phút ${sec} giây`;
+            const securityHash = document.getElementById('report-hash').innerText;
+
+            let plain = `==================================================\n`;
+            plain += `       KẾT QUẢ TRẮC NGHIỆM TOÁN HỌC LỚP 6\n`;
+            plain += `     Chuyên đề: Tập hợp & Cách viết tập hợp\n`;
+            plain += `==================================================\n\n`;
+            plain += `Họ và tên học sinh: ${studentName}\n`;
+            plain += `Lớp học: ${studentClass}\n`;
+            plain += `Điểm số đạt được: ${score}/${total}\n`;
+            plain += `Tỷ lệ chính xác: ${accuracy}%\n`;
+            plain += `Thời gian làm bài: ${formattedTime}\n`;
+            plain += `Mã xác thực bảo mật: ${securityHash}\n\n`;
+            plain += `--------------------------------------------------\n`;
+            plain += `CHI TIẾT ĐÁP ÁN BÀI THI:\n`;
+            
+            answersLog.forEach(log => {
+                const cleanQuestion = log.title.replace(/<\/?[^>]+(>|$)/g, "");
+                plain += `Câu ${log.num}: ${cleanQuestion}\n`;
+                plain += `  - Lựa chọn đã điền: [${log.selected}]\n`;
+                plain += `  - Đáp án chuẩn: [${log.correct}] -> (${log.status === 'correct' ? 'ĐÚNG' : 'SAI'})\n\n`;
+            });
+
+            plain += `--------------------------------------------------\n`;
+            plain += `Báo cáo kết quả được tạo tự động bởi Hệ Thống Trắc Nghiệm Đấu Trường Toán Học 6.\n`;
+            return plain;
+        }
+
+        function restartGame() {
+            currentIdx = 0;
+            score = 0;
+            answersLog = [];
+            selectedItemForTouch = null;
+            
+            document.getElementById('screen-report').classList.add('hidden');
+            document.getElementById('screen-report').classList.remove('flex');
+            document.getElementById('screen-login').classList.remove('hidden');
+
+            document.getElementById('student-name').value = "";
+            document.getElementById('student-class').value = "";
+        }
+    </script>
+</body>
+</html>
